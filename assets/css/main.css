@@ -3,7 +3,8 @@ html {
   --prmr-clr: #2f80ed;
   --scndr-clr: #333333;
   --bg: #ffffff;
-  margin: 0.5rem; }
+  margin: 0.5rem;
+  overflow-x: hidden; }
 
 html[data-theme='dark'] {
   --prmr-clr: #2f80ed;
@@ -87,6 +88,20 @@ section {
   padding: 0; }
 
 @media (max-width: 575px) {
+  .photo {
+    max-width: 300px;
+    margin-top: 25px; }
+  .experience {
+    display: block; }
+  .contact__type {
+    min-width: 75px; }
+  .contact {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column; } }
+
+@media (max-width: 320px) {
   .photo {
     max-width: 172px; }
   .experience {
