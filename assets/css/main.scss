@@ -103,8 +103,8 @@ section {
 
 @media (max-width: 575px) {
 	.photo {
-		max-width: 300px;
-		margin-top: 25px;
+		max-width: 100%;
+		margin-top: 30px ;
 	}
 
   	.experience {
@@ -121,7 +121,7 @@ section {
 
 @media (max-width: 320px) {
 	.photo {
-		max-width: 172px;
+		max-width: 100%;
 	}
 
   	.experience {
