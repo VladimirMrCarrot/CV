@@ -1,45 +1,64 @@
+/*
+ * ЗМІНИ:
+ * [FIX 6]  --prmr-clr  → --color-accent
+ * [FIX 6]  --scndr-clr → --color-text
+ * [FIX 6]  --bg        → --color-bg
+ * [FIX 7]  margin: 0.5rem перенесено з html → body як padding
+ * [FIX 8]  hr тепер має власний margin — <br> в HTML більше не потрібен
+ * [FIX 10] .photo: float:left → flexbox (.header-layout + .header-content)
+ * [FIX 11] transition: all → конкретні властивості (color, background-color)
+ */
+
 html {
   font-family: Ubuntu, sans-serif;
-  --prmr-clr: #F2B666;
-  --scndr-clr: #333333;
-  --bg: #ffffff;
-  margin: 0.5rem;
+
+  /* [FIX 6] Читабельні назви змінних */
+  --color-accent: #f2b666;
+  --color-text: #333333;
+  --color-bg: #ffffff;
+
   overflow-x: hidden;
 }
 
-html[data-theme=dark] {
-  --prmr-clr: #F2B666;
-  --scndr-clr: #ffffff;
-  --bg: #202020;
+html[data-theme="dark"] {
+  --color-accent: #f2b666;
+  --color-text: #ffffff;
+  --color-bg: #202020;
 }
 
+/* [FIX 7] margin прибрано з html, тепер padding на body */
 body {
-  background: var(--bg);
+  background: var(--color-bg);
+  padding: 0.5rem;
 }
 
 * {
-  color: var(--scndr-clr);
+  color: var(--color-text);
 }
 
 h1 {
-  color: var(--prmr-clr);
+  color: var(--color-accent);
   margin-bottom: 0.25rem;
 }
 
 h2 {
-  color: var(--scndr-clr);
+  color: var(--color-text);
   font-size: 1.2rem;
-  margin-top: 0;
   margin: 0.4rem 0;
 }
 
 h3 {
-  color: var(--prmr-clr);
+  color: var(--color-accent);
   margin: 0 0 0.2rem;
 }
 
+/* [FIX 8] Явний margin на hr замість <br> в HTML */
+hr {
+  margin: 0.5rem 0;
+}
+
 a {
-  color: var(--prmr-clr);
+  color: var(--color-accent);
   text-decoration: none;
 }
 
@@ -65,12 +84,23 @@ section {
   margin: 0 auto;
 }
 
+/* [FIX 10] Замість float:left — flexbox-контейнер */
+.header-layout {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+}
+
+.header-content {
+  flex: 1;
+  position: relative; /* для абсолютного позиціонування theme-switch */
+}
+
 .photo {
-  float: left;
   width: 100%;
   max-width: 13rem;
   height: auto;
-  margin: 0 0.7rem 0.3rem 0;
+  flex-shrink: 0;
 }
 
 .contacts {
@@ -108,21 +138,29 @@ section {
 }
 
 @media (max-width: 575px) {
+  .header-layout {
+    flex-direction: column;
+  }
+
   .photo {
     max-width: 100%;
     margin-top: 25px;
   }
+
   .experience {
     display: block;
   }
+
   .contact__type {
     min-width: 75px;
   }
+
   .contact {
     flex-direction: column;
   }
 }
 
+/* Theme toggle */
 .theme-switch-wrapper {
   position: absolute;
   right: 0;
@@ -150,25 +188,25 @@ section {
   position: absolute;
   right: 0;
   top: 0;
-  transition: 0.4s;
+  transition: background-color 0.4s;
 }
 
-.slider:before {
+.slider::before {
   background-color: #fff;
   bottom: 4px;
   content: "";
   height: 26px;
   left: 4px;
   position: absolute;
-  transition: 0.4s;
+  transition: transform 0.4s;
   width: 26px;
 }
 
 input:checked + .slider {
-  background-color: var(--prmr-clr);
+  background-color: var(--color-accent);
 }
 
-input:checked + .slider:before {
+input:checked + .slider::before {
   transform: translateX(26px);
 }
 
@@ -176,12 +214,15 @@ input:checked + .slider:before {
   border-radius: 34px;
 }
 
-.slider.round:before {
+.slider.round::before {
   border-radius: 50%;
 }
 
+/* [FIX 11] transition: all замінено на конкретні властивості — більш перформантно */
 html.transition,
 html.transition * {
-  transition: all 750ms !important;
+  transition:
+    color 750ms,
+    background-color 750ms !important;
   transition-delay: 0 !important;
 }
