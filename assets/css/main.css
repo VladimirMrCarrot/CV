@@ -7,12 +7,14 @@
  * [FIX 8]  hr тепер має власний margin — <br> в HTML більше не потрібен
  * [FIX 10] .photo: float:left → flexbox (.header-layout + .header-content)
  * [FIX 11] transition: all → конкретні властивості (color, background-color)
+ * [FIX 12] .header-layout: position:relative — toggle прив'язаний до нього
+ * [FIX 12] mobile: .header-content: position:static — toggle накладається на фото
+ * [FIX 13] .theme-switch-wrapper: flex-direction:column — підпис під toggle
  */
 
 html {
   font-family: Ubuntu, sans-serif;
 
-  /* [FIX 6] Читабельні назви змінних */
   --color-accent: #f2b666;
   --color-text: #333333;
   --color-bg: #ffffff;
@@ -26,7 +28,6 @@ html[data-theme="dark"] {
   --color-bg: #202020;
 }
 
-/* [FIX 7] margin прибрано з html, тепер padding на body */
 body {
   background: var(--color-bg);
   padding: 0.5rem;
@@ -52,7 +53,6 @@ h3 {
   margin: 0 0 0.2rem;
 }
 
-/* [FIX 8] Явний margin на hr замість <br> в HTML */
 hr {
   margin: 0.5rem 0;
 }
@@ -84,16 +84,16 @@ section {
   margin: 0 auto;
 }
 
-/* [FIX 10] Замість float:left — flexbox-контейнер */
 .header-layout {
   display: flex;
   gap: 0.7rem;
   align-items: flex-start;
+  position: relative;
 }
 
 .header-content {
   flex: 1;
-  position: relative; /* для абсолютного позиціонування theme-switch */
+  position: relative;
 }
 
 .photo {
@@ -142,9 +142,13 @@ section {
     flex-direction: column;
   }
 
+  .header-content {
+    position: static;
+  }
+
   .photo {
     max-width: 100%;
-    margin-top: 25px;
+    margin-top: 0;
   }
 
   .experience {
@@ -166,7 +170,14 @@ section {
   right: 0;
   top: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 0.2rem;
+}
+
+.theme-switch-wrapper span {
+  margin-right: 0;
+  font-size: 0.75rem;
 }
 
 .theme-switch {
@@ -218,7 +229,6 @@ input:checked + .slider::before {
   border-radius: 50%;
 }
 
-/* [FIX 11] transition: all замінено на конкретні властивості — більш перформантно */
 html.transition,
 html.transition * {
   transition:
