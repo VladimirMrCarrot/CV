@@ -19,31 +19,13 @@ checkbox.addEventListener('change', function () {
 });
 
 document.getElementById('downloadPdf').addEventListener('click', async () => {
-  const controls    = document.querySelector('.cv-controls');
-  const element     = document.querySelector('.cv');
-  const isDark      = document.documentElement.getAttribute('data-theme') === 'dark';
-  const bgColor     = isDark ? '#202020' : '#ffffff';
-
-  const parent      = element.parentNode;
-  const nextSibling = element.nextSibling;
+  const controls = document.querySelector('.cv-controls');
+  const element  = document.querySelector('.cv');
+  const isDark   = document.documentElement.getAttribute('data-theme') === 'dark';
+  const bgColor  = isDark ? '#202020' : '#ffffff';
 
   controls.style.display = 'none';
-
-  const wrapper = document.createElement('div');
-  wrapper.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: -9999px;
-    width: 900px;
-    background: ${bgColor};
-  `;
-  document.body.appendChild(wrapper);
-  wrapper.appendChild(element);
-  element.style.maxWidth = 'none';
-  element.style.margin   = '0';
-  element.style.position = 'relative';
-
-  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  let linkData = [];
 
   try {
     const canvas = await html2canvas(element, {
@@ -51,7 +33,29 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
       useCORS: true,
       windowWidth: 900,
       backgroundColor: bgColor,
-      logging: false
+      logging: false,
+      onclone: (clonedDoc) => {
+        clonedDoc.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+
+        const clonedCV   = clonedDoc.querySelector('.cv');
+        const clonedRect = clonedCV.getBoundingClientRect();
+
+        clonedCV.querySelectorAll('a[href]').forEach((link) => {
+          const r = link.getBoundingClientRect();
+          if (r.width === 0 || r.height === 0) return;
+
+          // Спочатку вимірюємо — потім міняємо колір
+          linkData.push({
+            href:   link.href,  // link.href вже абсолютний URL — без індексів
+            left:   r.left   - clonedRect.left,
+            top:    r.top    - clonedRect.top,
+            width:  r.width,
+            height: r.height
+          });
+
+          link.style.color = '#f2b666';
+        });
+      }
     });
 
     const A4_W     = 210;
@@ -69,6 +73,9 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
       imgW = contentH / ratio;
     }
 
+    const scaleX = imgW / (canvas.width  / 2);
+    const scaleY = imgH / (canvas.height / 2);
+
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
@@ -79,43 +86,19 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
 
     pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', MARGIN, MARGIN, imgW, imgH);
 
-    const scaleX = imgW / element.offsetWidth;
-    const scaleY = imgH / element.offsetHeight;
-
-    element.querySelectorAll('a[href]').forEach(link => {
-      let top = 0, left = 0, el = link;
-      while (el && el !== element) {
-        top  += el.offsetTop;
-        left += el.offsetLeft;
-        el    = el.offsetParent;
-      }
-      if (!el) return;
-
-      const w = link.offsetWidth;
-      const h = link.offsetHeight;
-      if (w === 0 || h === 0) return;
-
+    linkData.forEach(({ href, left, top, width, height }) => {
       pdf.link(
-        MARGIN + left * scaleX,
-        MARGIN + top  * scaleY,
-        w * scaleX,
-        h * scaleY,
-        { url: link.href }
+        MARGIN + left   * scaleX,
+        MARGIN + top    * scaleY,
+        width  * scaleX,
+        height * scaleY,
+        { url: href }
       );
     });
 
     pdf.save('CV_Volodymyr_Semenko.pdf');
 
   } finally {
-    element.style.maxWidth = '';
-    element.style.margin   = '';
-    element.style.position = '';
-    if (nextSibling) {
-      parent.insertBefore(element, nextSibling);
-    } else {
-      parent.appendChild(element);
-    }
-    document.body.removeChild(wrapper);
     controls.style.display = '';
   }
 });
@@ -124,8 +107,8 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
 const scrollTopBtn = document.getElementById('scrollTop');
 
 window.addEventListener('scroll', () => {
-  const scrolled    = window.scrollY + window.innerHeight;
-  const threshold   = document.documentElement.scrollHeight * 0.6;
+  const scrolled  = window.scrollY + window.innerHeight;
+  const threshold = document.documentElement.scrollHeight * 0.6;
   scrollTopBtn.classList.toggle('visible', scrolled >= threshold);
 });
 
