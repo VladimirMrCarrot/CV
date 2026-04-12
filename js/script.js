@@ -1,13 +1,3 @@
-/*
- * ЗМІНИ:
- * [FIX 1]  Тема зберігається в localStorage
- * [FIX 12] function transition() → const transition = () =>
- * [FIX 13] Генерація PDF через html2canvas + jsPDF
- * [FIX 18] Оригінальний елемент в offscreen wrapper — без фліку
- * [FIX 19] MARGIN=8 для обох тем, dark mode заливає весь A4 темним — без білих країв і зсуву
- * [FIX 20] offsetParent chain → точні координати посилань
- */
-
 const checkbox = document.querySelector('.theme-switch__checkbox');
 
 const transition = () => {
@@ -82,7 +72,6 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-    // Dark mode: заливаємо весь A4 — поля теж темні, без білих країв
     if (isDark) {
       pdf.setFillColor(32, 32, 32);
       pdf.rect(0, 0, A4_W, A4_H, 'F');
@@ -90,7 +79,6 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
 
     pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', MARGIN, MARGIN, imgW, imgH);
 
-    // offsetParent chain — координати відносно .cv, незалежно від позиції на екрані
     const scaleX = imgW / element.offsetWidth;
     const scaleY = imgH / element.offsetHeight;
 
@@ -131,12 +119,13 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
     controls.style.display = '';
   }
 });
-// Scroll to top — показується коли проскролено 60% сторінки
+
+// Scroll to top
 const scrollTopBtn = document.getElementById('scrollTop');
 
 window.addEventListener('scroll', () => {
-  const scrolled  = window.scrollY + window.innerHeight;
-  const threshold = document.documentElement.scrollHeight * 0.6;
+  const scrolled    = window.scrollY + window.innerHeight;
+  const threshold   = document.documentElement.scrollHeight * 0.6;
   scrollTopBtn.classList.toggle('visible', scrolled >= threshold);
 });
 
