@@ -34,12 +34,20 @@
         <img src="assets/img/ava_new_red.png" alt="Volodymyr Semenko" class="photo">
         <div class="header-content">
 
-          <div class="theme-switch-wrapper">
-            <span>Dark mode</span>
+          <div class="cv-controls">
             <label class="theme-switch" aria-label="Toggle dark mode">
               <input type="checkbox" class="theme-switch__checkbox" />
               <div class="slider round"></div>
             </label>
+            <button class="cv-controls__btn" id="downloadPdf" aria-label="Download CV as PDF">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                   fill="none" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="#333333" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline stroke="#333333" points="7 10 12 15 17 10"/>
+                <line stroke="#333333" x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </button>
           </div>
 
           <h1>Volodymyr Semenko</h1>
@@ -74,7 +82,9 @@
 
     <section>
       <div class="description">
-        IT specialist with 8+ years of experience in business and system analysis. I know how both back-end and front-end work, which helps me write accurate requirements and catch problems before they reach the dev team. My key strengths — I:
+        IT specialist with 8+ years of experience in business and system analysis.
+        I know how both back-end and front-end work, which helps me write accurate
+        requirements and catch problems before they reach the dev team. My key strengths — I:
         <ul>
           <li>care about the products I work on and always look for ways to make them better</li>
           <li>can take a complex problem and break it into clear, actionable steps</li>
@@ -175,25 +185,13 @@
     </section>
 
     <section>
-      <h3>Education</h3>
-
-      <div class="experience">
-        <div class="experience__date">2005 – 2010</div>
-        <div class="experience__description">
-          <div class="experience__name">Specialist degree — Silicate Technology (Glass &amp; Enamel)</div>
-          <div class="experience__company">Ukrainian State University of Chemical Technology (UDCHT), Dnipro</div>
-        </div>
-      </div>
-    </section>
-
-    <section>
       <h3>Skills</h3>
       <p>Requirements Management, Agile &amp; Waterfall, UML, BPMN 2.0, Mentoring</p>
 
       <h3>Tools</h3>
-      <p>Jira, Confluence, Figma, Miro, Postman, PlantUML, Mermaid</p>
+      <p>Jira, Confluence, Figma, Miro, Postman, SQL, Draw.io, PlantUML, Mermaid</p>
 
-      <h3>AI Tools</h3>
+      <h3>AI</h3>
       <p>Claude, Gemini, GitHub Copilot</p>
 
       <h3>Languages</h3>
@@ -201,19 +199,21 @@
     </section>
 
     <section>
-      <h3>Certificates</h3>
-
+      <h3>Education</h3>
       <div class="experience">
-        <div class="experience__date">May 2025</div>
+        <div class="experience__date">2005 – 2010</div>
         <div class="experience__description">
-          <div class="experience__name">
-            <a href="assets/certificates/certificate-pm-laba-25.pdf" target="_blank" rel="noopener noreferrer">
-              Project Manager
-            </a>
+          <div class="experience__name">Specialist degree (equivalent to Master's)</div>
+          <div class="experience__company">Ukrainian State University of Chemical Technology (USCHT), Dnipro</div>
+          <div class="experience__details">
+            Department of Glass and Enamels · Technology of Refractory Non-metallic and Silicate Materials
           </div>
-          <div class="experience__company">Laba · 19 hours</div>
         </div>
       </div>
+    </section>
+
+    <section>
+      <h3>Certificates</h3>
 
       <div class="experience">
         <div class="experience__date">Mar 2024</div>
@@ -227,10 +227,31 @@
         </div>
       </div>
 
+      <div class="experience">
+        <div class="experience__date">May 2025</div>
+        <div class="experience__description">
+          <div class="experience__name">
+            <a href="assets/certificates/certificate-pm-laba-25.pdf" target="_blank" rel="noopener noreferrer">
+              Project Manager
+            </a>
+          </div>
+          <div class="experience__company">Laba · 19 hours</div>
+        </div>
+      </div>
+
     </section>
 
   </div>
 
+  <button class="scroll-top" id="scrollTop" aria-label="Scroll to top">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+       fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline stroke="#333333" points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="js/script.js"></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B28NSQ9NKC"></script>
   <script>

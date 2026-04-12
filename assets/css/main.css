@@ -4,12 +4,13 @@
  * [FIX 6]  --scndr-clr → --color-text
  * [FIX 6]  --bg        → --color-bg
  * [FIX 7]  margin: 0.5rem перенесено з html → body як padding
- * [FIX 8]  hr тепер має власний margin — <br> в HTML більше не потрібен
- * [FIX 10] .photo: float:left → flexbox (.header-layout + .header-content)
- * [FIX 11] transition: all → конкретні властивості (color, background-color)
- * [FIX 12] .header-layout: position:relative — toggle прив'язаний до нього
- * [FIX 12] mobile: .header-content: position:static — toggle накладається на фото
- * [FIX 13] .theme-switch-wrapper: flex-direction:column — підпис під toggle
+ * [FIX 8]  hr тепер має власний margin
+ * [FIX 10] .photo: float:left → flexbox
+ * [FIX 11] transition: all → конкретні властивості
+ * [FIX 12] .header-layout: position:relative
+ * [FIX 12] mobile: .header-content: position:static
+ * [FIX 13] .cv-controls: toggle + download pill-кнопка
+ * [FIX 14] SVG stroke через presentation attributes в HTML — надійний темний колір іконки
  */
 
 html {
@@ -137,54 +138,25 @@ section {
   padding: 0;
 }
 
-@media (max-width: 575px) {
-  .header-layout {
-    flex-direction: column;
-  }
-
-  .header-content {
-    position: static;
-  }
-
-  .photo {
-    max-width: 100%;
-    margin-top: 0;
-  }
-
-  .experience {
-    display: block;
-  }
-
-  .contact__type {
-    min-width: 75px;
-  }
-
-  .contact {
-    flex-direction: column;
-  }
-}
-
-/* Theme toggle */
-.theme-switch-wrapper {
+/* CV Controls */
+.cv-controls {
   position: absolute;
   right: 0;
   top: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.4rem;
 }
 
-.theme-switch-wrapper span {
-  margin-right: 0;
-  font-size: 0.75rem;
-}
-
+/* Theme toggle */
 .theme-switch {
   display: inline-block;
   height: 34px;
   position: relative;
   width: 60px;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .theme-switch input {
@@ -227,6 +199,113 @@ input:checked + .slider::before {
 
 .slider.round::before {
   border-radius: 50%;
+}
+
+/* Download button */
+.cv-controls__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 34px;
+  border-radius: 34px;
+  background-color: #ccc;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background-color 0.2s;
+}
+
+.cv-controls__btn svg path,
+.cv-controls__btn svg polyline,
+.cv-controls__btn svg line {
+  transition: stroke 0.2s;
+}
+
+.cv-controls__btn:hover {
+  background-color: var(--color-accent);
+}
+
+.cv-controls__btn:hover svg path,
+.cv-controls__btn:hover svg polyline,
+.cv-controls__btn:hover svg line {
+  stroke: #ffffff;
+}
+
+@media (max-width: 575px) {
+  .header-layout {
+    flex-direction: column;
+  }
+
+  .header-content {
+    position: static;
+  }
+
+  .photo {
+    max-width: 100%;
+    margin-top: 0;
+  }
+
+  .experience {
+    display: block;
+  }
+
+  .contact__type {
+    min-width: 75px;
+  }
+
+  .contact {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  .cv-controls {
+    display: none;
+  }
+}
+
+/* Scroll to top — тільки mobile */
+.scroll-top {
+  display: none;
+  position: fixed;
+  bottom: 1.2rem;
+  right: 1.2rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #ccc;
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: background-color 0.2s, opacity 0.3s;
+  opacity: 0;
+  z-index: 999;
+}
+
+.scroll-top.visible {
+  opacity: 1;
+}
+
+.scroll-top:hover {
+  background-color: var(--color-accent);
+}
+
+.scroll-top:hover svg polyline {
+  stroke: #ffffff;
+}
+
+.scroll-top svg polyline {
+  transition: stroke 0.2s;
+}
+
+@media (max-width: 575px) {
+  .scroll-top {
+    display: flex;
+  }
 }
 
 html.transition,
