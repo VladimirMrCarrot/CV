@@ -1,1 +1,1 @@
-My online CV, available at https://vladimirmrcarrot.github.io/CV/
+My online CV, available at https://mrcarrot13666.me
