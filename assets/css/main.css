@@ -234,7 +234,9 @@ input:checked + .slider::before {
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   opacity: 0;
-  transition: background-color 0.2s, opacity 0.3s;
+  transition:
+    background-color 0.2s,
+    opacity 0.3s;
   z-index: 999;
 }
 
@@ -294,7 +296,7 @@ input:checked + .slider::before {
 html.transition,
 html.transition * {
   transition:
-    color 750ms,
-    background-color 750ms !important;
+    color 250ms,
+    background-color 250ms !important;
   transition-delay: 0 !important;
 }
