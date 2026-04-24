@@ -14,6 +14,80 @@ html[data-theme="dark"] {
   --color-bg: #202020;
 }
 
+html[data-pdf="true"] {
+  overflow: visible;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html[data-pdf="true"] body {
+  overflow: visible;
+}
+
+html[data-pdf="true"],
+html[data-pdf="true"] body,
+html[data-pdf="true"] * {
+  font-family: Ubuntu, sans-serif !important;
+}
+
+html[data-pdf="true"] a {
+  color: var(--color-accent) !important;
+  text-decoration: none !important;
+}
+
+html[data-pdf="true"] ul {
+  margin: 0.15rem 0 0.15rem 1.1rem;
+  padding-left: 0;
+  list-style: none;
+}
+
+html[data-pdf="true"] .description ul {
+  margin-left: 1.3rem;
+}
+
+html[data-pdf="true"] li {
+  position: relative;
+  padding-left: 1rem;
+  break-inside: avoid;
+}
+
+html[data-pdf="true"] li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--color-text);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+html[data-pdf="true"] h1,
+html[data-pdf="true"] h2,
+html[data-pdf="true"] .experience__name {
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  font-kerning: normal;
+  font-variant-ligatures: normal;
+  white-space: normal;
+}
+
+html[data-pdf="true"] .cv {
+  max-width: 900px;
+}
+
+html[data-pdf="true"] .header-layout {
+  align-items: flex-start;
+}
+
+html[data-pdf="true"] .experience {
+  display: flex;
+}
+
+html[data-pdf="true"] .cv-controls,
+html[data-pdf="true"] .scroll-top {
+  display: none !important;
+}
+
 body {
   background: var(--color-bg);
   padding: 0.5rem;
@@ -290,6 +364,10 @@ input:checked + .slider::before {
 @media print {
   .cv-controls {
     display: none;
+  }
+
+  .scroll-top {
+    display: none !important;
   }
 }
 

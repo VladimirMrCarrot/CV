@@ -1,5 +1,54 @@
 const checkbox = document.querySelector('.theme-switch__checkbox');
 
+const mmToPt = (mm) => mm * (72 / 25.4);
+
+const parseRgb = (color) => {
+  const m = color && color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+  if (!m) return [51, 51, 51];
+  return [Number(m[1]), Number(m[2]), Number(m[3])];
+};
+
+const arrayBufferToBase64 = (buffer) => {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, chunk);
+  }
+
+  return btoa(binary);
+};
+
+let ubuntuFontPromise;
+const ensureUbuntuFonts = async (pdf) => {
+  if (!ubuntuFontPromise) {
+    ubuntuFontPromise = (async () => {
+      const regularUrl = 'https://raw.githubusercontent.com/google/fonts/main/ufl/ubuntu/Ubuntu-Regular.ttf';
+      const boldUrl = 'https://raw.githubusercontent.com/google/fonts/main/ufl/ubuntu/Ubuntu-Bold.ttf';
+
+      const [regularRes, boldRes] = await Promise.all([fetch(regularUrl), fetch(boldUrl)]);
+      if (!regularRes.ok || !boldRes.ok) {
+        throw new Error('Failed to load Ubuntu font files for PDF export');
+      }
+
+      const [regularBuf, boldBuf] = await Promise.all([regularRes.arrayBuffer(), boldRes.arrayBuffer()]);
+
+      return {
+        regularB64: arrayBufferToBase64(regularBuf),
+        boldB64: arrayBufferToBase64(boldBuf)
+      };
+    })();
+  }
+
+  const fonts = await ubuntuFontPromise;
+  pdf.addFileToVFS('Ubuntu-Regular.ttf', fonts.regularB64);
+  pdf.addFont('Ubuntu-Regular.ttf', 'Ubuntu', 'normal');
+  pdf.addFileToVFS('Ubuntu-Bold.ttf', fonts.boldB64);
+  pdf.addFont('Ubuntu-Bold.ttf', 'Ubuntu', 'bold');
+};
+
 const transition = () => {
   document.documentElement.classList.add('transition');
   setTimeout(() => document.documentElement.classList.remove('transition'), 250);
@@ -22,23 +71,110 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
   const controls = document.querySelector('.cv-controls');
   const element  = document.querySelector('.cv');
   const isDark   = document.documentElement.getAttribute('data-theme') === 'dark';
+  const isMobileViewport = window.matchMedia('(max-width: 575px)').matches;
   const bgColor  = isDark ? '#202020' : '#ffffff';
+  const renderScale = 2;
 
   controls.style.display = 'none';
   let linkData = [];
+  let clonedCvSize = { width: 0, height: 0 };
+  let mobileTextData = [];
 
   try {
+    if (document.fonts?.ready) {
+      await document.fonts.ready;
+    }
+
     const canvas = await html2canvas(element, {
-      scale: 2,
+      scale: renderScale,
       useCORS: true,
       windowWidth: 900,
       backgroundColor: bgColor,
       logging: false,
       onclone: (clonedDoc) => {
         clonedDoc.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        clonedDoc.documentElement.setAttribute('data-pdf', 'true');
+        clonedDoc.documentElement.style.overflow = 'visible';
+        clonedDoc.documentElement.style.webkitTextSizeAdjust = 'none';
+        clonedDoc.documentElement.style.textSizeAdjust = 'none';
+        clonedDoc.documentElement.style.backgroundColor = bgColor;
+        clonedDoc.body.style.overflow = 'visible';
+        clonedDoc.body.style.margin = '0';
+        clonedDoc.body.style.backgroundColor = bgColor;
 
         const clonedCV   = clonedDoc.querySelector('.cv');
+        const clonedView = clonedDoc.defaultView;
+
+        // Force desktop canvas layout no matter the current viewport width.
+        clonedCV.style.width = '900px';
+        clonedCV.style.maxWidth = '900px';
+        clonedCV.style.backgroundColor = bgColor;
         const clonedRect = clonedCV.getBoundingClientRect();
+        clonedCvSize = { width: clonedRect.width, height: clonedRect.height };
+
+        clonedCV.querySelectorAll('h1, h2, .experience__name').forEach((el) => {
+          el.style.setProperty('letter-spacing', '0', 'important');
+          el.style.setProperty('word-spacing', '0', 'important');
+          el.style.fontKerning = 'normal';
+          el.style.fontVariantLigatures = 'normal';
+
+          if (isMobileViewport) {
+            // Keep required font while preserving spacing fixes on mobile.
+            el.style.setProperty('font-family', 'Ubuntu, sans-serif', 'important');
+            el.style.setProperty('font-stretch', 'normal', 'important');
+            el.style.setProperty('font-variant-ligatures', 'none', 'important');
+            el.style.setProperty('font-kerning', 'none', 'important');
+          }
+        });
+
+        if (isMobileViewport) {
+          clonedCV.querySelectorAll('.header-content h1, .header-content h2, .experience__name').forEach((el) => {
+            if (el.querySelector('a')) return;
+
+            const text = (el.textContent || '').trim();
+            if (!text) return;
+
+            const style = clonedView.getComputedStyle(el);
+            const rect = el.getBoundingClientRect();
+
+            mobileTextData.push({
+              text,
+              left: rect.left - clonedRect.left,
+              top: rect.top - clonedRect.top,
+              color: style.color,
+              fontSizePx: parseFloat(style.fontSize) || 16,
+              fontWeight: style.fontWeight || '400'
+            });
+
+            // Hide these nodes in canvas and redraw as vector text in PDF.
+            el.style.setProperty('color', 'transparent', 'important');
+            el.style.setProperty('text-shadow', 'none', 'important');
+          });
+        }
+
+        // html2canvas may drop native list markers, so inject explicit bullets.
+        clonedCV.querySelectorAll('li').forEach((li) => {
+          if (li.querySelector('.pdf-bullet-marker')) return;
+
+          const marker = clonedDoc.createElement('span');
+          marker.className = 'pdf-bullet-marker';
+          marker.textContent = '•';
+          marker.setAttribute('aria-hidden', 'true');
+
+          const markerColor = clonedView.getComputedStyle(li).color;
+          li.style.listStyle = 'none';
+          li.style.position = 'relative';
+          li.style.paddingLeft = '1rem';
+
+          marker.style.position = 'absolute';
+          marker.style.left = '0';
+          marker.style.top = '0';
+          marker.style.lineHeight = '1.2';
+          marker.style.fontWeight = '700';
+          marker.style.color = markerColor;
+
+          li.prepend(marker);
+        });
 
         clonedCV.querySelectorAll('a[href]').forEach((link) => {
           const r = link.getBoundingClientRect();
@@ -73,8 +209,8 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
       imgW = contentH / ratio;
     }
 
-    const scaleX = imgW / (canvas.width  / 2);
-    const scaleY = imgH / (canvas.height / 2);
+    const scaleX = clonedCvSize.width > 0 ? (imgW / clonedCvSize.width) : (imgW / (canvas.width / renderScale));
+    const scaleY = clonedCvSize.height > 0 ? (imgH / clonedCvSize.height) : (imgH / (canvas.height / renderScale));
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -84,7 +220,32 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
       pdf.rect(0, 0, A4_W, A4_H, 'F');
     }
 
-    pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', MARGIN, MARGIN, imgW, imgH);
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', MARGIN, MARGIN, imgW, imgH);
+
+    if (isMobileViewport && mobileTextData.length > 0) {
+      try {
+        await ensureUbuntuFonts(pdf);
+      } catch (e) {
+        console.warn('Ubuntu font embedding failed for mobile PDF overlay:', e);
+      }
+
+      mobileTextData.forEach((item) => {
+        const [r, g, b] = parseRgb(item.color);
+        const fontStyle = Number(item.fontWeight) >= 600 ? 'bold' : 'normal';
+        const x = MARGIN + item.left * scaleX;
+        const y = MARGIN + item.top * scaleY + (item.fontSizePx * 0.82 * scaleY);
+
+        try {
+          pdf.setFont('Ubuntu', fontStyle);
+        } catch {
+          pdf.setFont('helvetica', fontStyle);
+        }
+
+        pdf.setTextColor(r, g, b);
+        pdf.setFontSize(mmToPt(item.fontSizePx * scaleY));
+        pdf.text(item.text, x, y, { baseline: 'alphabetic' });
+      });
+    }
 
     linkData.forEach(({ href, left, top, width, height }) => {
       pdf.link(
