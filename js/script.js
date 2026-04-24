@@ -60,6 +60,22 @@ if (savedTheme) {
   checkbox.checked = savedTheme === 'dark';
 }
 
+const finalizeFontInit = () => {
+  document.documentElement.classList.remove('fonts-loading');
+  document.documentElement.classList.add('fonts-ready');
+};
+
+if (document.fonts?.ready) {
+  document.fonts.ready.then(finalizeFontInit).catch(finalizeFontInit);
+} else {
+  finalizeFontInit();
+}
+
+setTimeout(() => {
+  document.documentElement.classList.add('theme-ready');
+  document.documentElement.classList.remove('theme-init');
+}, 50);
+
 checkbox.addEventListener('change', function () {
   transition();
   const theme = this.checked ? 'dark' : 'light';
@@ -68,14 +84,12 @@ checkbox.addEventListener('change', function () {
 });
 
 document.getElementById('downloadPdf').addEventListener('click', async () => {
-  const controls = document.querySelector('.cv-controls');
   const element  = document.querySelector('.cv');
   const isDark   = document.documentElement.getAttribute('data-theme') === 'dark';
-  const isMobileViewport = window.matchMedia('(max-width: 575px)').matches;
+  const useTextOverlay = true;
   const bgColor  = isDark ? '#202020' : '#ffffff';
   const renderScale = 2;
 
-  controls.style.display = 'none';
   let linkData = [];
   let clonedCvSize = { width: 0, height: 0 };
   let mobileTextData = [];
@@ -105,6 +119,10 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
         const clonedCV   = clonedDoc.querySelector('.cv');
         const clonedView = clonedDoc.defaultView;
 
+        clonedDoc.querySelectorAll('.cv-controls, .scroll-top').forEach((el) => {
+          el.style.display = 'none';
+        });
+
         // Force desktop canvas layout no matter the current viewport width.
         clonedCV.style.width = '900px';
         clonedCV.style.maxWidth = '900px';
@@ -118,8 +136,8 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
           el.style.fontKerning = 'normal';
           el.style.fontVariantLigatures = 'normal';
 
-          if (isMobileViewport) {
-            // Keep required font while preserving spacing fixes on mobile.
+          if (useTextOverlay) {
+            // Keep required font while preserving spacing fixes in PDF exports.
             el.style.setProperty('font-family', 'Ubuntu, sans-serif', 'important');
             el.style.setProperty('font-stretch', 'normal', 'important');
             el.style.setProperty('font-variant-ligatures', 'none', 'important');
@@ -127,7 +145,7 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
           }
         });
 
-        if (isMobileViewport) {
+        if (useTextOverlay) {
           clonedCV.querySelectorAll('.header-content h1, .header-content h2, .experience__name').forEach((el) => {
             if (el.querySelector('a')) return;
 
@@ -222,11 +240,11 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
 
     pdf.addImage(canvas.toDataURL('image/png'), 'PNG', MARGIN, MARGIN, imgW, imgH);
 
-    if (isMobileViewport && mobileTextData.length > 0) {
+    if (useTextOverlay && mobileTextData.length > 0) {
       try {
         await ensureUbuntuFonts(pdf);
       } catch (e) {
-        console.warn('Ubuntu font embedding failed for mobile PDF overlay:', e);
+        console.warn('Ubuntu font embedding failed for PDF overlay:', e);
       }
 
       mobileTextData.forEach((item) => {
@@ -259,9 +277,7 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
 
     pdf.save('CV_Volodymyr_Semenko.pdf');
 
-  } finally {
-    controls.style.display = '';
-  }
+  } finally {}
 });
 
 // Scroll to top

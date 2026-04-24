@@ -14,6 +14,10 @@ html[data-theme="dark"] {
   --color-bg: #202020;
 }
 
+html.fonts-loading .cv {
+  visibility: hidden;
+}
+
 html[data-pdf="true"] {
   overflow: visible;
   -webkit-text-size-adjust: 100%;
@@ -230,7 +234,7 @@ section {
   position: absolute;
   right: 0;
   top: 0;
-  transition: background-color 0.4s;
+  transition: none;
 }
 
 .slider::before {
@@ -240,8 +244,21 @@ section {
   height: 26px;
   left: 4px;
   position: absolute;
-  transition: transform 0.4s;
+  transition: none;
   width: 26px;
+}
+
+html.theme-ready .theme-switch .slider {
+  transition: background-color 0.4s;
+}
+
+html.theme-ready .theme-switch .slider::before {
+  transition: transform 0.4s;
+}
+
+html.theme-init .theme-switch .slider,
+html.theme-init .theme-switch .slider::before {
+  transition: none !important;
 }
 
 input:checked + .slider {
@@ -250,6 +267,23 @@ input:checked + .slider {
 
 input:checked + .slider::before {
   transform: translateX(26px);
+}
+
+/* Keep toggle visual state stable before JS syncs checkbox.checked */
+html[data-theme="dark"] .theme-switch .slider {
+  background-color: var(--color-accent);
+}
+
+html[data-theme="dark"] .theme-switch .slider::before {
+  transform: translateX(26px);
+}
+
+html[data-theme="light"] .theme-switch .slider {
+  background-color: #ccc;
+}
+
+html[data-theme="light"] .theme-switch .slider::before {
+  transform: translateX(0);
 }
 
 .slider.round {
